@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriTemiz - Veri Temizleme Aracı</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome ikonları -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Özel stiller -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <script>
+        // Tailwind yapılandırması
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        },
+                        warning: {
+                            50: '#fffbeb',
+                            600: '#d97706',
+                            700: '#b45309',
+                        },
+                        danger: {
+                            50: '#fef2f2',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                        },
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Özel animasyonlar */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        /* Sürükle-bırak alanı stilleri */
+        .drop-zone {
+            @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors;
+        }
+        .drop-zone.drag-over {
+            @apply border-primary-400 bg-primary-50;
+        }
+        /* Özel kaydırma çubuğu */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            @apply bg-gray-100 rounded-full;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            @apply bg-gray-400 rounded-full hover:bg-gray-500;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Üst Bilgi Çubuğu -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-broom text-primary-600 text-2xl"></i>
+                <h1 class="text-2xl font-bold text-gray-800">VeriTemiz</h1>
+            </div>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="#" class="text-primary-600 font-medium">Ana Sayfa</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-primary-600">Nasıl Kullanılır?</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-primary-600">Hakkında</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Başlık ve Açıklama -->
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">Verilerinizi Kolayca Temizleyin</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">CSV dosyalarınızı yükleyin, temizleme işlemlerini seçin ve temizlenmiş verilerinizi hemen indirin. Tamamen ücretsiz ve kullanımı kolay.</p>
+        </div>
+
+        <!-- Durum Mesajları -->
+        <div id="status-message" class="mb-6 transition-all duration-300 ease-in-out"></div>
+
+        <!-- 1. Dosya Yükleme Kartı -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 animate-fade-in">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-100 text-primary-600 mr-4">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">1. Veri Yükle</h3>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="drop-zone" class="drop-zone">
+                    <input type="file" id="file-upload" accept=".csv" class="hidden">
+                    <div class="space-y-3">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                        <p class="text-gray-600">Dosyanızı sürükleyip bırakın veya</p>
+                        <button id="upload-btn" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                            <i class="fas fa-folder-open mr-2"></i>Dosya Seç
+                        </button>
+                        <p class="text-xs text-gray-500 mt-2">Sadece CSV dosyaları desteklenmektedir (max. 10MB)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Veri Önizleme -->
+        <div id="preview-section" class="hidden bg-white rounded-xl shadow-md overflow-hidden mb-8 animate-fade-in">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 mr-4">
+                        <i class="fas fa-table"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">2. Veri Önizleme</h3>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table id="data-preview" class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <!-- Sütun başlıkları JavaScript ile eklenecek -->
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <!-- Veri satırları JavaScript ile eklenecek -->
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-sm text-gray-500 mt-3">* Sadece ilk 10 satır gösterilmektedir</p>
+            </div>
+        </div>
+
+        <!-- 3. Temizleme Seçenekleri -->
+        <div id="cleaning-options" class="hidden bg-white rounded-xl shadow-md overflow-hidden mb-8 animate-fade-in">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-600 mr-4">
+                        <i class="fas fa-sliders-h"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">3. Temizleme Seçenekleri</h3>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="remove-missing" type="checkbox" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3">
+                                <label for="remove-missing" class="font-medium text-gray-700">Eksik Değerleri Temizle</label>
+                                <p class="text-sm text-gray-500">Eksik (NaN, boş) değer içeren tüm satırları kaldırır.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="remove-duplicates" type="checkbox" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3">
+                                <label for="remove-duplicates" class="font-medium text-gray-700">Yinelenenleri Kaldır</label>
+                                <p class="text-sm text-gray-500">Tüm sütunlarda tam eşleşen yinelenen satırları kaldırır.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end">
+                    <button id="process-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors flex items-center">
+                        <i class="fas fa-magic mr-2"></i> Veriyi Temizle ve İndir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bilgi Kartları -->
+        <div class="grid md:grid-cols-3 gap-6 mt-12">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
+                    <i class="fas fa-bolt text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-lg mb-2">Hızlı ve Kolay</h4>
+                <p class="text-gray-600 text-sm">Sadece birkaç tıklamayla verilerinizi temizleyin. Teknik bilgi gerekmez.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-4">
+                    <i class="fas fa-shield-alt text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-lg mb-2">Güvenli</h4>
+                <p class="text-gray-600 text-sm">Dosyalarınız sadece işlem süresince saklanır, güvende kalır.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 mb-4">
+                    <i class="fas fa-infinity text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-lg mb-2">Sınırsız Kullanım</h4>
+                <p class="text-gray-600 text-sm">İstediğiniz kadar dosya yükleyin ve işleyin. Hiçbir sınırlama yok.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Alt Bilgi -->
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                    <i class="fas fa-broom text-primary-600"></i>
+                    <span class="font-semibold text-gray-800">VeriTemiz</span>
+                </div>
+                <div class="text-sm text-gray-500">
+                    &copy; 2023 VeriTemiz. Tüm hakları saklıdır.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
