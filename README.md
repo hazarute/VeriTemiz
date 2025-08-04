@@ -33,8 +33,8 @@ VeriTemiz, kullanıcı dostu bir arayüz ile veri temizleme işlemlerini kolayla
 
 2. Projeyi klonlayın:
    ```bash
-   git clone https://github.com/kullaniciadi/VeriTemiz1.0.git
-   cd VeriTemiz1.0
+   git clone https://github.com/hazarute/VeriTemiz.git
+   cd VeriTemiz
    ```
 
 3. Sanal ortam oluşturup etkinleştirin:
@@ -108,7 +108,7 @@ Bu proje MIT lisansı altında lisanslanmıştır - detaylar için [LICENSE](LIC
 
 Proje sahibi: [HAZAR UTE] - hazarute@gmail.com
 
-Proje Linki: [https://github.com/kullaniciadi/VeriTemiz1.0](https://github.com/kullaniciadi/VeriTemiz1.0)
+Proje Linki: [https://github.com/hazarute/VeriTemiz](https://github.com/hazarute/VeriTemiz)
 
 ## Teşekkürler
 
